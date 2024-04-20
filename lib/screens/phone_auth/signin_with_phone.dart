@@ -1,55 +1,29 @@
-import 'dart:developer';
+// ignore_for_file: dead_code
 
 import 'package:firebaseconnect/common/global_text.dart';
-import 'package:firebaseconnect/screens/email_auth/login_acc.dart';
+import 'package:firebaseconnect/screens/email_auth/create_acc.dart';
 import 'package:firebaseconnect/static/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
-class CreateAcc extends StatefulWidget {
-  const CreateAcc({Key? key}) : super(key: key);
+class SinginWithPhone extends StatefulWidget {
+  const SinginWithPhone({super.key});
 
   @override
-  State<CreateAcc> createState() => _CreateAccState();
+  State<SinginWithPhone> createState() => _SinginWithPhoneState();
 }
 
-final _EmailController = TextEditingController();
-final _CreatepassController = TextEditingController();
-final _ConfirmpassController = TextEditingController();
-bool _validate = false;
-
-void createAccount(BuildContext context) async {
-  String email = _EmailController.text.trim();
-  String password = _CreatepassController.text.trim();
-  String confirmpassword = _ConfirmpassController.text.trim();
-
-  if (email == "" || password == "" || confirmpassword == "") {
-    log("Please Fill All The Details");
-  } else if (password != confirmpassword) {
-    log("Passwords Do Not Match!");
-  } else {
-    // Create a new Account
-    try {
-      UserCredential userCredential = await FirebaseAuth.instance
-          .createUserWithEmailAndPassword(email: email, password: password);
-      if (userCredential.user != null) {
-        Navigator.pop(context);
-      }
-    } on FirebaseAuthException catch (e) {
-      log(e.code.toString());
-    }
-  }
-}
-
-class _CreateAccState extends State<CreateAcc> {
+class _SinginWithPhoneState extends State<SinginWithPhone> {
+  final phone = TextEditingController();
   @override
   Widget build(BuildContext context) {
+    bool _validate = false;
     return Scaffold(
       body: SingleChildScrollView(
-        child: Center(
+        
+        child: Center(  
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 23.0),
+             padding: const EdgeInsets.symmetric(horizontal: 23.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -61,9 +35,6 @@ class _CreateAccState extends State<CreateAcc> {
                   text: "WELCOME",
                   fontSize: 32,
                   fontWeight: FontWeight.w600,
-                ),
-                SizedBox(
-                  height: 52,
                 ),
                 Center(
                   child: Container(
@@ -88,56 +59,14 @@ class _CreateAccState extends State<CreateAcc> {
                           height: 66,
                           width: 290,
                           child: TextField(
-                            controller: _EmailController,
+                            controller: phone,
                             decoration: InputDecoration(
                               errorText:
                                   _validate ? 'Value Cant be empty' : null,
                               contentPadding: EdgeInsets.all(10),
                               hintStyle: TextStyle(color: tdGrey),
-                              hintText: 'Email',
+                              hintText: 'Phone No',
                               suffixIcon: Icon(Icons.email_outlined),
-                              border: OutlineInputBorder(
-                                borderSide: const BorderSide(
-                                    color: Colors.red, width: 4),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                          ),
-                        ),
-                        SizedBox(
-                          height: 16,
-                        ),
-                        SizedBox(
-                          height: 66,
-                          width: 290,
-                          child: TextField(
-                            controller: _CreatepassController,
-                            decoration: InputDecoration(
-                              contentPadding: EdgeInsets.all(10),
-                              hintStyle: TextStyle(color: tdGrey),
-                              hintText: 'Create Password',
-                              suffixIcon: Icon(Icons.remove_red_eye_outlined),
-                              border: OutlineInputBorder(
-                                borderSide: const BorderSide(
-                                    color: Colors.red, width: 4),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                          ),
-                        ),
-                        SizedBox(
-                          height: 16,
-                        ),
-                        SizedBox(
-                          height: 66,
-                          width: 290,
-                          child: TextField(
-                            controller: _ConfirmpassController,
-                            decoration: InputDecoration(
-                              contentPadding: EdgeInsets.all(10),
-                              hintStyle: TextStyle(color: tdGrey),
-                              hintText: 'Confirm Password',
-                              suffixIcon: Icon(Icons.remove_red_eye_outlined),
                               border: OutlineInputBorder(
                                 borderSide: const BorderSide(
                                     color: Colors.red, width: 4),
@@ -173,8 +102,7 @@ class _CreateAccState extends State<CreateAcc> {
                           ),
                         ),
                       ],
-                    ),
-                  ),
+                    ),),
                 ),
               ],
             ),

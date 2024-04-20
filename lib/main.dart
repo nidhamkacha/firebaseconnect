@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebaseconnect/firebase_options.dart';
 import 'package:firebaseconnect/screens/email_auth/create_acc.dart';
@@ -24,7 +25,9 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       // home: const Text("oooo"),
-      home: const LoginScreen(),
+      home: (FirebaseAuth.instance.currentUser != null)
+          ? LoginScreen()
+          : LoginScreen(),
     );
   }
 }
