@@ -20,10 +20,9 @@ class _SinginWithPhoneState extends State<SinginWithPhone> {
     bool _validate = false;
     return Scaffold(
       body: SingleChildScrollView(
-        
-        child: Center(  
+        child: Center(
           child: Padding(
-             padding: const EdgeInsets.symmetric(horizontal: 23.0),
+            padding: const EdgeInsets.symmetric(horizontal: 23.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -66,7 +65,7 @@ class _SinginWithPhoneState extends State<SinginWithPhone> {
                               contentPadding: EdgeInsets.all(10),
                               hintStyle: TextStyle(color: tdGrey),
                               hintText: 'Phone No',
-                              suffixIcon: Icon(Icons.email_outlined),
+                              suffixIcon: Icon(Icons.phone),
                               border: OutlineInputBorder(
                                 borderSide: const BorderSide(
                                     color: Colors.red, width: 4),
@@ -102,7 +101,8 @@ class _SinginWithPhoneState extends State<SinginWithPhone> {
                           ),
                         ),
                       ],
-                    ),),
+                    ),
+                  ),
                 ),
               ],
             ),
