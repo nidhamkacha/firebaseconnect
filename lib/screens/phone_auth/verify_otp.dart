@@ -1,41 +1,40 @@
-// ignore_for_file: dead_code
-
 import 'dart:developer';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebaseconnect/common/global_text.dart';
-import 'package:firebaseconnect/screens/email_auth/create_acc.dart';
-import 'package:firebaseconnect/screens/phone_auth/verify_otp.dart';
+import 'package:firebaseconnect/home_screen.dart';
 import 'package:firebaseconnect/static/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class SinginWithPhone extends StatefulWidget {
-  const SinginWithPhone({super.key});
+class VerifyOtp extends StatefulWidget {
+  final String verificationId;
+  const VerifyOtp({super.key, required this.verificationId});
 
   @override
-  State<SinginWithPhone> createState() => _SinginWithPhoneState();
+  State<VerifyOtp> createState() => _VerifyOtpState();
 }
 
-class _SinginWithPhoneState extends State<SinginWithPhone> {
-  final phonecontroller = TextEditingController();
-  void sendOTP() async {
-    String phone = "+91" + phonecontroller.text.trim();
-    FirebaseAuth.instance.verifyPhoneNumber(
-        phoneNumber: phone,
-        codeSent: (verificationId, forceResendingToken) {
-          
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => VerifyOtp(verificationId: verificationId,),
-              ));
-        },
-        verificationCompleted: (phoneAuthCredential) {},
-        verificationFailed: (error) {
-          log(error.code.toString());
-        },
-        codeAutoRetrievalTimeout: (verificationId) {},
-        timeout: Duration(seconds: 30));
+class _VerifyOtpState extends State<VerifyOtp> {
+  final optcontroller = TextEditingController();
+  void verifyOTP() async {
+    String otp = optcontroller.text.trim();
+    PhoneAuthCredential credential = PhoneAuthProvider.credential(
+        verificationId: widget.verificationId, smsCode: otp);
+    try {
+      UserCredential userCredential =
+          await FirebaseAuth.instance.signInWithCredential(credential);
+      if (userCredential.user != null) {
+        Navigator.popUntil(context, (route) => route.isFirst); 
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => HomeScreen(),
+            ));
+      }
+    } on FirebaseAuthException catch (e) {
+      log(e.code.toString());
+    }
   }
 
   @override
@@ -54,7 +53,7 @@ class _SinginWithPhoneState extends State<SinginWithPhone> {
                   height: 74,
                 ),
                 GlobalText(
-                  text: "WELCOME",
+                  text: "Verification",
                   fontSize: 32,
                   fontWeight: FontWeight.w600,
                 ),
@@ -81,13 +80,14 @@ class _SinginWithPhoneState extends State<SinginWithPhone> {
                           height: 66,
                           width: 290,
                           child: TextField(
-                            controller: phonecontroller,
+                            maxLength: 6,
+                            controller: optcontroller,
                             decoration: InputDecoration(
                               errorText:
                                   _validate ? 'Value Cant be empty' : null,
                               contentPadding: EdgeInsets.all(10),
                               hintStyle: TextStyle(color: tdGrey),
-                              hintText: 'Phone No',
+                              hintText: 'Enter 6-Digit Verification Code',
                               suffixIcon: Icon(Icons.phone),
                               border: OutlineInputBorder(
                                 borderSide: const BorderSide(
@@ -107,14 +107,14 @@ class _SinginWithPhoneState extends State<SinginWithPhone> {
                             width: double.infinity,
                             child: ElevatedButton(
                               onPressed: () {
-                                sendOTP();
+                                verifyOTP();
                               },
                               style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.black,
                                   shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(15))),
                               child: Text(
-                                "Create Account",
+                                "Verify OTP",
                                 style: GoogleFonts.poppins(
                                     color: Colors.white,
                                     fontSize: 18,

@@ -1,5 +1,4 @@
 import 'dart:developer';
-import 'dart:js';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebaseconnect/common/global_text.dart';
