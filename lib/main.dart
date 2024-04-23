@@ -1,8 +1,12 @@
+// import 'dart:developer';
+// import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:developer';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebaseconnect/firebase_options.dart';
 import 'package:firebaseconnect/home_screen.dart';
-import 'package:firebaseconnect/screens/email_auth/login_acc.dart';
 import 'package:firebaseconnect/screens/phone_auth/signin_with_phone.dart';
 import 'package:flutter/material.dart';
 
@@ -11,6 +15,9 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  QuerySnapshot snapshot =
+      await FirebaseFirestore.instance.collection("user").get();
+  log(snapshot.docs.toString());
   runApp(const MyApp());
 }
 
