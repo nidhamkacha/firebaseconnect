@@ -1,14 +1,18 @@
 // ignore_for_file: dead_code
 
 import 'dart:developer';
+import 'dart:io';
 
+// import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebaseconnect/common/global_text.dart';
 import 'package:firebaseconnect/screens/email_auth/login_acc.dart';
 import 'package:firebaseconnect/static/colors.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -20,6 +24,8 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final namecontroller = TextEditingController();
   final emailcontroller = TextEditingController();
+  final agecontroller = TextEditingController();
+  File? profilepic;
   void logout() async {
     await FirebaseAuth.instance.signOut();
     Navigator.popUntil(context, (route) => route.isFirst);
@@ -32,13 +38,23 @@ class _HomeScreenState extends State<HomeScreen> {
   void saveuser() async {
     String name = namecontroller.text.trim();
     String email = emailcontroller.text.trim();
-    if (name == " " && email == " ") {
+    String ageString = agecontroller.text.trim();
+    int age = int.parse(ageString);
+    namecontroller.clear();
+    emailcontroller.clear();
+    agecontroller.clear();
+    log(name);
+    log(email);
+    if (name != " " && email != " " && age != "") {
       Map<String, dynamic> userData = {
         "name": name,
+        "age": age,
         "email": email,
       };
-      FirebaseFirestore.instance.collection("user").add(userData);
+      await FirebaseFirestore.instance.collection("user").add(userData);
       log("User Created: ");
+    } else {
+      log("error");
     }
   }
 
@@ -60,12 +76,36 @@ class _HomeScreenState extends State<HomeScreen> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 SizedBox(
-                  height: 74,
+                  height: 64,
                 ),
-                GlobalText(
-                  text: "WELCOME",
-                  fontSize: 32,
-                  fontWeight: FontWeight.w600,
+                CupertinoButton(
+                  onPressed: () async {
+                    try {
+                      XFile? selectedImage = await ImagePicker()
+                          .pickImage(source: ImageSource.gallery);
+                      if (selectedImage != null) {
+                        File convertedFile = File(selectedImage.name);
+                        setState(() {
+                          profilepic = convertedFile;
+                        });
+                        log("Image Selectd");
+                      } else {
+                        log("No Image Selected");
+                      }
+                    } catch (e) {
+                      log("Error picking image: $e");
+                    }
+                  },
+                  padding: EdgeInsets.zero,
+                  child: CircleAvatar(
+                    radius: 40,
+                    backgroundImage:
+                        (profilepic != null) ? FileImage(profilepic!) : null,
+                    backgroundColor: Colors.grey,
+                  ),
+                ),
+                SizedBox(
+                  height: 15,
                 ),
                 Center(
                   child: Container(
@@ -97,7 +137,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               contentPadding: EdgeInsets.all(10),
                               hintStyle: TextStyle(color: tdGrey),
                               hintText: 'Name',
-                              suffixIcon: Icon(Icons.phone),
+                              suffixIcon: Icon(Icons.person),
                               border: OutlineInputBorder(
                                 borderSide: const BorderSide(
                                     color: Colors.red, width: 4),
@@ -120,7 +160,30 @@ class _HomeScreenState extends State<HomeScreen> {
                               contentPadding: EdgeInsets.all(10),
                               hintStyle: TextStyle(color: tdGrey),
                               hintText: 'Email',
-                              suffixIcon: Icon(Icons.phone),
+                              suffixIcon: Icon(Icons.email),
+                              border: OutlineInputBorder(
+                                borderSide: const BorderSide(
+                                    color: Colors.red, width: 4),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                          ),
+                        ),
+                        SizedBox(
+                          height: 16,
+                        ),
+                        SizedBox(
+                          height: 66,
+                          width: 290,
+                          child: TextField(
+                            controller: agecontroller,
+                            decoration: InputDecoration(
+                              errorText:
+                                  _validate ? 'Value Cant be empty' : null,
+                              contentPadding: EdgeInsets.all(10),
+                              hintStyle: TextStyle(color: tdGrey),
+                              hintText: 'Age',
+                              suffixIcon: Icon(Icons.boy),
                               border: OutlineInputBorder(
                                 borderSide: const BorderSide(
                                     color: Colors.red, width: 4),
@@ -155,6 +218,47 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                           ),
                         ),
+                        SizedBox(
+                          height: 16,
+                        ),
+                        StreamBuilder<QuerySnapshot>(
+                            stream: FirebaseFirestore.instance
+                                .collection("user")
+                                .where("age")
+                                .snapshots(),
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState ==
+                                  ConnectionState.active) {
+                                if (snapshot.hasData && snapshot.data != null) {
+                                  return Expanded(
+                                    child: ListView.builder(
+                                        shrinkWrap: true,
+                                        itemCount: snapshot.data!.docs.length,
+                                        itemBuilder: (context, index) {
+                                          Map<String, dynamic> userMap =
+                                              snapshot.data!.docs[index].data()
+                                                  as Map<String, dynamic>;
+                                          return ListTile(
+                                            title: Text(userMap["name"] +
+                                                " " +
+                                                userMap["age"].toString()),
+                                            subtitle: Text(userMap["email"]),
+                                            trailing: IconButton(
+                                              onPressed: () {},
+                                              icon: Icon(Icons.delete),
+                                            ),
+                                          );
+                                        }),
+                                  );
+                                } else {
+                                  return Text("No data");
+                                }
+                              } else {
+                                return Center(
+                                  child: CircularProgressIndicator(),
+                                );
+                              }
+                            })
                       ],
                     ),
                   ),

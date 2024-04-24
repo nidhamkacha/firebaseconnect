@@ -23,11 +23,12 @@ class _SinginWithPhoneState extends State<SinginWithPhone> {
     FirebaseAuth.instance.verifyPhoneNumber(
         phoneNumber: phone,
         codeSent: (verificationId, forceResendingToken) {
-          
           Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => VerifyOtp(verificationId: verificationId,),
+                builder: (context) => VerifyOtp(
+                  verificationId: verificationId,
+                ),
               ));
         },
         verificationCompleted: (phoneAuthCredential) {},
