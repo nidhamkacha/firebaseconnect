@@ -1,20 +1,19 @@
 // ignore_for_file: dead_code
 
+import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
 
-// import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:firebaseconnect/common/global_text.dart';
-import 'package:firebaseconnect/screens/email_auth/login_acc.dart';
 import 'package:firebaseconnect/screens/phone_auth/signin_with_phone.dart';
 import 'package:firebaseconnect/static/colors.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:uuid/uuid.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -50,18 +49,35 @@ class _HomeScreenState extends State<HomeScreen> {
     log(name);
     log(email);
     if (name != " " && email != " " && age != "" && profilepic != null) {
-      // await FirebaseStorage.instance.ref()
+      UploadTask uploadtask = FirebaseStorage.instance
+          .ref()
+          .child("profilepictures")
+          .child(Uuid().v1())
+          .putFile(profilepic!);
+
+      StreamSubscription tasksubscription =
+          uploadtask.snapshotEvents.listen((snapshot) {
+        double percentage =
+            snapshot.bytesTransferred / snapshot.totalBytes * 100;
+        log(percentage.toString());
+      });
+      TaskSnapshot taskSnapshot = await uploadtask;
+      String downloadurl = await taskSnapshot.ref.getDownloadURL();
+      tasksubscription.cancel();
       Map<String, dynamic> userData = {
         "name": name,
         "age": age,
         "email": email,
-        // "profilepic": <downloadurl>
+        "profilepic": downloadurl
       };
       await FirebaseFirestore.instance.collection("user").add(userData);
       log("User Created: ");
     } else {
       log("error");
     }
+    setState(() {
+      profilepic = null;
+    });
   }
 
   @override
@@ -252,6 +268,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                                 " " +
                                                 userMap["age"].toString()),
                                             subtitle: Text(userMap["email"]),
+                                            leading: CircleAvatar(
+                                              backgroundImage: NetworkImage(
+                                                  userMap["profilepic"]),
+                                            ),
                                             trailing: IconButton(
                                               onPressed: () {},
                                               icon: Icon(Icons.delete),

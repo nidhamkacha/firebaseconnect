@@ -8,6 +8,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebaseconnect/firebase_options.dart';
 import 'package:firebaseconnect/home_screen.dart';
 import 'package:firebaseconnect/screens/phone_auth/signin_with_phone.dart';
+import 'package:firebaseconnect/sevices/notification_services.dart';
 import 'package:flutter/material.dart';
 
 void main() async {
@@ -15,6 +16,12 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  NotificationServices notificationServices = NotificationServices();
+  notificationServices.getDeviceTocken().then((value) {
+    print('device Tocken');
+    print(value);
+  });
+
   QuerySnapshot snapshot =
       await FirebaseFirestore.instance.collection("user").get();
   log(snapshot.docs.toString());
