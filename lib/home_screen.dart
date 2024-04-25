@@ -6,8 +6,10 @@ import 'dart:io';
 // import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebaseconnect/common/global_text.dart';
 import 'package:firebaseconnect/screens/email_auth/login_acc.dart';
+import 'package:firebaseconnect/screens/phone_auth/signin_with_phone.dart';
 import 'package:firebaseconnect/static/colors.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -26,12 +28,14 @@ class _HomeScreenState extends State<HomeScreen> {
   final emailcontroller = TextEditingController();
   final agecontroller = TextEditingController();
   File? profilepic;
+
   void logout() async {
     await FirebaseAuth.instance.signOut();
     Navigator.popUntil(context, (route) => route.isFirst);
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => LoginScreen()),
+      // MaterialPageRoute(builder: (context) => LoginScreen()),
+      MaterialPageRoute(builder: (context) => SinginWithPhone()),
     );
   }
 
@@ -45,11 +49,13 @@ class _HomeScreenState extends State<HomeScreen> {
     agecontroller.clear();
     log(name);
     log(email);
-    if (name != " " && email != " " && age != "") {
+    if (name != " " && email != " " && age != "" && profilepic != null) {
+      // await FirebaseStorage.instance.ref()
       Map<String, dynamic> userData = {
         "name": name,
         "age": age,
         "email": email,
+        // "profilepic": <downloadurl>
       };
       await FirebaseFirestore.instance.collection("user").add(userData);
       log("User Created: ");
@@ -66,6 +72,9 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: Text("Home "),
         centerTitle: true,
+        actions: [
+          IconButton(onPressed: () => logout(), icon: Icon(Icons.logout)),
+        ],
       ),
       body: SingleChildScrollView(
         child: Center(
@@ -84,7 +93,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       XFile? selectedImage = await ImagePicker()
                           .pickImage(source: ImageSource.gallery);
                       if (selectedImage != null) {
-                        File convertedFile = File(selectedImage.name);
+                        File convertedFile = File(selectedImage.path);
                         setState(() {
                           profilepic = convertedFile;
                         });
